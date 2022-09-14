@@ -19,7 +19,7 @@ from .time_series import (
 )
 
 
-class OneArgumentSeries(NumericSeries):
+class OneArgumentSeries(NumericSeries): 
     func = talib.MA
 
     def __init__(self, series, arg):
@@ -28,7 +28,7 @@ class OneArgumentSeries(NumericSeries):
 
             try:
                 series[series == np.inf] = np.nan
-                series = self.func(series, arg)
+                series = OneArgumentSeries.func(series, arg)
             except Exception as e:
                 raise FormulaException(e)
         super(OneArgumentSeries, self).__init__(series)
@@ -63,7 +63,7 @@ class TwoArgumentSeries(NumericSeries):
 
             try:
                 series[series == np.inf] = np.nan
-                series = self.func(series, arg1, arg2)
+                series = TwoArgumentSeries.func(series, arg1, arg2)
             except Exception as e:
                 raise FormulaException(e)
         super(TwoArgumentSeries, self).__init__(series)

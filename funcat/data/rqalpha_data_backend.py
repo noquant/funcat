@@ -18,7 +18,7 @@ class RQAlphaDataBackend(DataBackend):
     """
     skip_suspended = True
 
-    def __init__(self, bundle_path="~/.rqalpha/bundle"):
+    def __init__(self, bundle_path="~/.rqalpha/bundle", data_proxy=None):
         try:
             import rqalpha
         except ImportError:
@@ -30,11 +30,13 @@ class RQAlphaDataBackend(DataBackend):
         # # FIXME
         # import warnings
         # warnings.simplefilter(action="ignore", category=FutureWarning)
+        if data_proxy is not None:
+            self.data_proxy = data_proxy
+        else:
+            from rqalpha.data.base_data_source import BaseDataSource
+            from rqalpha.data.data_proxy import DataProxy
 
-        from rqalpha.data.base_data_source import BaseDataSource
-        from rqalpha.data.data_proxy import DataProxy
-
-        self.data_proxy = DataProxy(BaseDataSource(os.path.expanduser(bundle_path)))
+            self.data_proxy = DataProxy(BaseDataSource(os.path.expanduser(bundle_path), {}), None)
 
     def get_price(self, order_book_id, start, end, freq):
         """
@@ -44,7 +46,7 @@ class RQAlphaDataBackend(DataBackend):
         :returns:
         :rtype: numpy.rec.array
         """
-        assert freq == "1d"
+        assert freq in ("1d", "1m", "1w", "5m")
 
         start = get_date_from_int(start)
         end = get_date_from_int(end)
@@ -61,11 +63,11 @@ class RQAlphaDataBackend(DataBackend):
 
         return bars
 
-    def get_order_book_id_list(self):
+    def get_order_book_id_list(self, type="CS"):
         """获取所有的
         """
         import pandas as pd
-        insts = self.data_proxy.all_instruments("CS")
+        insts = self.data_proxy.all_instruments([type])
         if isinstance(insts, pd.DataFrame):
             # for old version of RQAlpha
             return sorted(insts.order_book_id.tolist())
@@ -79,7 +81,7 @@ class RQAlphaDataBackend(DataBackend):
         :returns: 名字
         :rtype: str
         """
-        return self.data_proxy.instruments(order_book_id).symbol
+        return self.data_proxy.instrument(order_book_id).symbol
 
     def get_trading_dates(self, start, end):
         """获取所有的交易日

@@ -24,3 +24,20 @@ def test_000001():
     assert np.equal(round(HHV(HIGH, 5).value, 2), 3245.09)
     assert np.equal(round(LLV(LOW, 5).value, 2), 3100.91)
     assert COUNT(CLOSE > OPEN, 5) == 2
+
+def test_000002():
+    from funcat.data.rqalpha_data_backend import RQAlphaDataBackend
+    set_data_backend(RQAlphaDataBackend())
+
+    T("20161216")
+    S("000001.XSHG")
+
+    d,k = DKX()
+    print(d,k)
+
+    top,left,right,bottom = BOX(1)
+    print(top,left,right,bottom)
+
+
+if __name__ == '__main__':
+    test_000002()
