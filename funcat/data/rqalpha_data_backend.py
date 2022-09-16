@@ -11,6 +11,7 @@ from numpy.lib import recfunctions as rfn
 from .backend import DataBackend
 from ..utils import get_date_from_int, get_int_date
 
+MAX_BAR_COUNT = 250
 
 class RQAlphaDataBackend(DataBackend):
     """
@@ -46,12 +47,12 @@ class RQAlphaDataBackend(DataBackend):
         :returns:
         :rtype: numpy.rec.array
         """
-        assert freq in ("1d", "1m", "1w", "5m")
+        assert freq in ("1d", "1m", "5m")
 
         start = get_date_from_int(start)
         end = get_date_from_int(end)
 
-        bar_count = (end - start).days
+        bar_count = min(MAX_BAR_COUNT, (end - start).days)
 
         bars = self.data_proxy.history_bars(
             order_book_id, bar_count, freq, field=None,
@@ -59,7 +60,8 @@ class RQAlphaDataBackend(DataBackend):
 
         if bars is None or len(bars) == 0:
             raise KeyError("empty bars {}".format(order_book_id))
-        bars = bars.copy()
+        # 只读暂不copy
+        # bars = bars.copy()
 
         return bars
 
