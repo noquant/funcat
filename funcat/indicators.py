@@ -113,7 +113,7 @@ def ASI(M1=26, M2=10):
 
 def VR(M1=26):
     """
-    VR容量比率
+    VR 容量比率
     """
     LC = REF(CLOSE, 1)
     VR = SUM(IF(CLOSE > LC, VOL, 0), M1) / SUM(IF(CLOSE <= LC, VOL, 0), M1) * 100
@@ -123,7 +123,7 @@ def VR(M1=26):
 
 def ARBR(M1=26):
     """
-    ARBR人气意愿指标
+    ARBR 人气意愿指标
     """
     AR = SUM(HIGH - OPEN, M1) / SUM(OPEN - LOW, M1) * 100
     BR = SUM(MAX(0, HIGH - REF(CLOSE, 1)), M1) / SUM(MAX(0, REF(CLOSE, 1) - LOW), M1) * 100
@@ -148,7 +148,7 @@ def TRIX(M1=12, M2=20):
 
 def DKX(M1=10):
     """
-    DKX多空线
+    DKX 多空线
     """    
     MID = (3*CLOSE+LOW+OPEN+HIGH)/6
     DKX = (20*MID+19*REF(MID,1)+18*REF(MID,2)+17*REF(MID,3)+
@@ -164,7 +164,7 @@ def DKX(M1=10):
 
 def BOX(Direction=None, M1=10):
     """
-    窗口
+    BOX 箱体计算
     """    
     if Direction is None:
         if REF(CLOSE,1) > REF(OPEN,1):
@@ -194,3 +194,43 @@ def BOX(Direction=None, M1=10):
         end_i = i - 1
         # 箱体区间
         return REF(HIGH, end_i), REF(OPEN, end_i), REF(CLOSE, begin_i), REF(LOW, begin_i)
+
+
+def BOX_FIND(Direction=None, M1=10):
+    """
+    BOX_FIND 箱体查找
+    """    
+    if Direction is None:
+        if REF(CLOSE,1) > REF(OPEN,1):
+            Direction = 1
+        else:
+            Direction = -1
+    # 不一定能够找到箱体
+    if Direction == 1:
+        begin_i, end_i = M1, 0
+        for i in range(1, M1):
+            if REF(CLOSE,i) > REF(OPEN,i):
+                begin_i = i
+                for j in range(begin_i, M1):
+                    if not REF(CLOSE,j) > REF(OPEN,j):
+                        break
+                end_i = j - 1
+                break
+        # print(begin_i, end_i)
+        if end_i >= begin_i:
+            # 箱体区间
+            return REF(LOW, end_i), REF(OPEN, end_i), REF(CLOSE, begin_i), REF(HIGH, begin_i)
+    else:
+        begin_i, end_i = M1, 0
+        for i in range(1, M1):
+            if REF(CLOSE,i) < REF(OPEN,i):
+                begin_i = i
+                for j in range(begin_i, M1):
+                    if not REF(CLOSE,j) < REF(OPEN,j):
+                        break
+                end_i = j - 1
+                break
+        # print(begin_i, end_i)
+        if end_i >= begin_i:
+            # 箱体区间
+            return REF(HIGH, end_i), REF(OPEN, end_i), REF(CLOSE, begin_i), REF(LOW, begin_i)
