@@ -10,8 +10,10 @@ from numpy.lib import recfunctions as rfn
 
 from .backend import DataBackend
 from ..utils import get_date_from_int, get_int_date
+from rqalpha.utils.config import rqalpha_path
 
 MAX_BAR_COUNT = 250
+data_bundle_path = os.path.join(os.path.expanduser(rqalpha_path), "bundle")
 
 class RQAlphaDataBackend(DataBackend):
     """
@@ -19,7 +21,7 @@ class RQAlphaDataBackend(DataBackend):
     """
     skip_suspended = True
 
-    def __init__(self, bundle_path="~/.rqalpha/bundle", data_proxy=None):
+    def __init__(self, bundle_path=data_bundle_path, data_proxy=None):
         try:
             import rqalpha
         except ImportError:
