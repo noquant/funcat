@@ -38,6 +38,28 @@ def getsourcelines(func):
         return ""
 
 
+def convert_date_to_int(dt):
+    t = dt.year * 10000 + dt.month * 100 + dt.day
+    t *= 1000000
+    return t
+
+
+def convert_dt_to_int(dt):
+    t = convert_date_to_int(dt)
+    t += dt.hour * 10000 + dt.minute * 100 + dt.second
+    return t
+
+
+def convert_int_to_datetime(dt_int):
+    dt_int = int(dt_int)
+    year, r = divmod(dt_int, 10000000000)
+    month, r = divmod(r, 100000000)
+    day, r = divmod(r, 1000000)
+    hour, r = divmod(r, 10000)
+    minute, second = divmod(r, 100)
+    return datetime.datetime(year, month, day, hour, minute, second)
+
+
 def get_int_date(date):
     if isinstance(date, int):
         return date

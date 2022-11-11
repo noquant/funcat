@@ -10,10 +10,8 @@ from numpy.lib import recfunctions as rfn
 
 from .backend import DataBackend
 from ..utils import get_date_from_int, get_int_date
-from rqalpha.utils.config import rqalpha_path
 
 MAX_BAR_COUNT = 250
-data_bundle_path = os.path.join(os.path.expanduser(rqalpha_path), "bundle")
 
 class RQAlphaDataBackend(DataBackend):
     """
@@ -21,25 +19,18 @@ class RQAlphaDataBackend(DataBackend):
     """
     skip_suspended = True
 
-    def __init__(self, bundle_path=data_bundle_path, data_proxy=None):
-        try:
-            import rqalpha
-        except ImportError:
-            print("-" * 50)
-            print("Run `pip install rqalpha` to install rqalpha first")
-            print("-" * 50)
-            raise
+    def __init__(self, data_proxy=None):
+        #
+        self.data_proxy = data_proxy
 
-        # # FIXME
-        # import warnings
-        # warnings.simplefilter(action="ignore", category=FutureWarning)
-        if data_proxy is not None:
-            self.data_proxy = data_proxy
-        else:
-            from rqalpha.data.base_data_source import BaseDataSource
-            from rqalpha.data.data_proxy import DataProxy
+    def init(self):
+        """"""
+        from rqalpha.utils.config import rqalpha_path
+        from rqalpha.data.base_data_source import BaseDataSource
+        from rqalpha.data.data_proxy import DataProxy
 
-            self.data_proxy = DataProxy(BaseDataSource(os.path.expanduser(bundle_path), {}), None)
+        data_bundle_path = os.path.join(os.path.expanduser(rqalpha_path), "bundle")
+        self.data_proxy = DataProxy(BaseDataSource(os.path.expanduser(data_bundle_path), {}), None)
 
     def get_price(self, order_book_id, start, end, freq):
         """
@@ -49,6 +40,9 @@ class RQAlphaDataBackend(DataBackend):
         :returns:
         :rtype: numpy.rec.array
         """
+        if self.data_proxy is None:
+            self.init()
+
         assert freq in ("1d", "1m", "5m")
 
         start = get_date_from_int(start)
@@ -70,6 +64,9 @@ class RQAlphaDataBackend(DataBackend):
     def get_order_book_id_list(self, type="CS"):
         """获取所有的
         """
+        if self.data_proxy is None:
+            self.init()
+
         import pandas as pd
         insts = self.data_proxy.all_instruments([type])
         if isinstance(insts, pd.DataFrame):
@@ -85,6 +82,9 @@ class RQAlphaDataBackend(DataBackend):
         :returns: 名字
         :rtype: str
         """
+        if self.data_proxy is None:
+            self.init()
+
         return self.data_proxy.instrument(order_book_id).symbol
 
     def get_trading_dates(self, start, end):
@@ -93,6 +93,9 @@ class RQAlphaDataBackend(DataBackend):
         :param start: 20160101
         :param end: 20160201
         """
+        if self.data_proxy is None:
+            self.init()
+            
         start = get_date_from_int(start)
         end = get_date_from_int(end)
         trading_dates = self.data_proxy.get_trading_dates(start, end).tolist()

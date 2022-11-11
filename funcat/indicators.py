@@ -2,7 +2,7 @@
 
 from .api import (
     OPEN, HIGH, LOW, CLOSE, VOLUME, VOL,
-    ABS, MAX, HHV, LLV,
+    ABS, MIN, MAX, HHV, LLV,
     REF, IF, SUM, STD,
     MA, EMA, SMA,
 )
@@ -146,7 +146,16 @@ def TRIX(M1=12, M2=20):
     return TRIX, TRMA
 
 
-def DKX(M1=10):
+def BBI(M1=3, M2=6, M3=12, M4=24):
+    """
+    BBI 多空指标
+    """    
+    BBI = (MA(CLOSE,M1)+MA(CLOSE,M2)+MA(CLOSE,M3)+MA(CLOSE,M4))/4
+
+    return BBI
+
+
+def DKX(M=10):
     """
     DKX 多空线
     """    
@@ -157,12 +166,12 @@ def DKX(M1=10):
         10*REF(MID,10)+9*REF(MID,11)+8*REF(MID,12)+
         7*REF(MID,13)+6*REF(MID,14)+5*REF(MID,15)+
         4*REF(MID,16)+3*REF(MID,17)+2*REF(MID,18)+REF(MID,20))/210
-    MADKX = MA(DKX, M1)
+    MADKX = MA(DKX, M)
 
     return DKX, MADKX
 
 
-def BOX(Direction=None, M1=10):
+def BOX(Direction=None, M1=20):
     """
     BOX 箱体计算
     """    
@@ -196,7 +205,7 @@ def BOX(Direction=None, M1=10):
         return REF(HIGH, end_i), REF(OPEN, end_i), REF(CLOSE, begin_i), REF(LOW, begin_i)
 
 
-def BOX_FIND(Direction=None, M1=10):
+def BOX_FIND(Direction=None, M1=20):
     """
     BOX_FIND 箱体查找
     """    
@@ -234,3 +243,121 @@ def BOX_FIND(Direction=None, M1=10):
         if end_i >= begin_i:
             # 箱体区间
             return REF(HIGH, end_i), REF(OPEN, end_i), REF(CLOSE, begin_i), REF(LOW, begin_i)
+        
+        
+def BOX_DOWN(M2=20):
+    """
+    BOX_DOWN 查找前面周期连续阳线，来确定向下突破箱体
+    """
+    start_i, stop_i = 1, M2
+    begin_i, end_i = M2, 0
+    for i in range(start_i, stop_i):
+        if REF(CLOSE,i) > REF(OPEN,i):
+            begin_i = i
+            for j in range(begin_i, stop_i):
+                if not REF(CLOSE,j) > REF(OPEN,j):
+                    break
+            end_i = j - 1
+            break
+    # 不一定能够找到箱体
+    if end_i >= begin_i:
+        # 第一个箱体区间
+        bottom1, top1 = MIN(REF(LOW, end_i), REF(LOW, begin_i)), MAX(REF(HIGH, end_i), REF(HIGH, begin_i))
+        return bottom1, top1
+
+ 
+def BOX_UP(M2=20):
+    """
+    BOX_UP 查找前面周期连续阴线，来确定向上突破箱体
+    """
+    start_i, stop_i = 1, M2
+    begin_i, end_i = M2, 0
+    for i in range(start_i, stop_i):
+        if REF(CLOSE,i) < REF(OPEN,i):
+            begin_i = i
+            for j in range(begin_i, stop_i):
+                if not REF(CLOSE,j) < REF(OPEN,j):
+                    break
+            end_i = j - 1
+            break
+    # 不一定能够找到箱体
+    if end_i >= begin_i:
+        # 第一个箱体区间
+        top1, bottom1 = MAX(REF(HIGH, end_i), REF(HIGH, begin_i)), MIN(REF(LOW, end_i), REF(LOW, begin_i))
+        return top1, bottom1
+
+                
+def BOX_BOX_DOWN(M2=20):
+    """
+    BOX_DOWN 查找前面周期连续阳线，来确定向下突破箱体
+    """
+    start_i, stop_i = 1, M2
+    begin_i, end_i = M2, 0
+    for i in range(start_i, stop_i):
+        if REF(CLOSE,i) > REF(OPEN,i):
+            begin_i = i
+            for j in range(begin_i, stop_i):
+                if not REF(CLOSE,j) > REF(OPEN,j):
+                    break
+            end_i = j - 1
+            break
+    # 不一定能够找到箱体
+    if end_i >= begin_i:
+        # 第一个箱体区间
+        bottom1, top1 = MIN(REF(LOW, end_i), REF(LOW, begin_i)), MAX(REF(HIGH, end_i), REF(HIGH, begin_i))
+        # 之后再找第二个
+        start_i, stop_i = 1 + end_i, M2 + end_i
+        begin_i, end_i = M2, 0
+        for i in range(start_i, stop_i):
+            if REF(CLOSE,i) > REF(OPEN,i):
+                begin_i = i
+                for j in range(begin_i, stop_i):
+                    if not REF(CLOSE,j) > REF(OPEN,j):
+                        break
+                end_i = j - 1
+                break
+        if end_i >= begin_i:
+            bottom2, top2 = MIN(REF(LOW, end_i), REF(LOW, begin_i)), MAX(REF(HIGH, end_i), REF(HIGH, begin_i))
+            return bottom1, top1, bottom2, top2
+        else:
+            return bottom1, top1, None, None
+    #
+    return None, None, None, None
+
+   
+def BOX_BOX_UP(M2=20):
+    """
+    BOX_UP 查找前面周期连续阴线，来确定向上突破箱体
+    """
+    start_i, stop_i = 1, M2
+    begin_i, end_i = M2, 0
+    for i in range(start_i, stop_i):
+        if REF(CLOSE,i) < REF(OPEN,i):
+            begin_i = i
+            for j in range(begin_i, stop_i):
+                if not REF(CLOSE,j) < REF(OPEN,j):
+                    break
+            end_i = j - 1
+            break
+    # 不一定能够找到箱体
+    if end_i >= begin_i:
+        # 第一个箱体区间
+        top1, bottom1 = MAX(REF(HIGH, end_i), REF(HIGH, begin_i)), MIN(REF(LOW, end_i), REF(LOW, begin_i))
+        # 之后再找第二个
+        start_i, stop_i = 1 + end_i, M2 + end_i
+        begin_i, end_i = M2, 0
+        for i in range(start_i, stop_i):
+            if REF(CLOSE,i) < REF(OPEN,i):
+                begin_i = i
+                for j in range(begin_i, stop_i):
+                    if not REF(CLOSE,j) < REF(OPEN,j):
+                        break
+                end_i = j - 1
+                break
+        if end_i >= begin_i:
+            top2, bottom2 = MAX(REF(HIGH, end_i), REF(HIGH, begin_i)), MIN(REF(LOW, end_i), REF(LOW, begin_i))
+            return top1, bottom1, top2, bottom2
+        else:
+            return top1, bottom1, None, None
+    #
+    return None, None, None, None
