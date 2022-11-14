@@ -2,7 +2,7 @@
 
 from .api import (
     OPEN, HIGH, LOW, CLOSE, VOLUME, VOL,
-    ABS, MIN, MAX, HHV, LLV,
+    ABS, MIN, MAX, HHV, LLV, CROSS,
     REF, IF, SUM, STD,
     MA, EMA, SMA,
 )
