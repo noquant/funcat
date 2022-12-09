@@ -113,7 +113,7 @@ def ASI(M1=26, M2=10):
 
 def VR(M1=26):
     """
-    VR 容量比率
+    VR容量比率
     """
     LC = REF(CLOSE, 1)
     VR = SUM(IF(CLOSE > LC, VOL, 0), M1) / SUM(IF(CLOSE <= LC, VOL, 0), M1) * 100
@@ -123,7 +123,7 @@ def VR(M1=26):
 
 def ARBR(M1=26):
     """
-    ARBR 人气意愿指标
+    ARBR人气意愿指标
     """
     AR = SUM(HIGH - OPEN, M1) / SUM(OPEN - LOW, M1) * 100
     BR = SUM(MAX(0, HIGH - REF(CLOSE, 1)), M1) / SUM(MAX(0, REF(CLOSE, 1) - LOW), M1) * 100

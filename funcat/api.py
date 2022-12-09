@@ -7,6 +7,7 @@ from .func import (
     AbsSeries,
     StdSeries,
     SMASeries,
+    CCISeries,
     MovingAverageSeries,
     WeightedMovingAverageSeries,
     ExponentialMovingAverageSeries,
@@ -23,7 +24,9 @@ from .func import (
 from .context import (
     symbol,
     set_current_security,
+    get_current_security,
     set_current_date,
+    get_current_date,
     set_start_date,
     set_data_backend,
     set_current_freq,
@@ -45,6 +48,7 @@ MA = MovingAverageSeries
 WMA = WeightedMovingAverageSeries
 EMA = ExponentialMovingAverageSeries
 SMA = SMASeries
+CCI = CCISeries
 
 SUM = SumSeries
 ABS = AbsSeries
@@ -73,6 +77,7 @@ __all__ = [
     "DATETIME",
 
     "SMA",
+    "CCI",
     "MA",
     "EMA",
     "WMA",
@@ -97,7 +102,9 @@ __all__ = [
     "select",
     "symbol",
     "set_current_security",
+    "get_current_security",
     "set_current_date",
+    "get_current_date",
     "set_start_date",
     "set_data_backend",
     "set_current_freq",

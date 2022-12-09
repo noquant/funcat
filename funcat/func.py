@@ -19,7 +19,7 @@ from .time_series import (
 )
 
 
-class OneArgumentSeries(NumericSeries): 
+class OneArgumentSeries(NumericSeries):
     func = talib.MA
 
     def __init__(self, series, arg):
@@ -28,7 +28,11 @@ class OneArgumentSeries(NumericSeries):
 
             try:
                 series[series == np.inf] = np.nan
-                series = OneArgumentSeries.func(series, arg)
+                """
+                Higher version TA-Lib may zip the (self, series, arg) into *args,
+                use class function here to avoid passing self downstream.
+                """
+                series = self.__class__.func(series, arg)
             except Exception as e:
                 raise FormulaException(e)
         super(OneArgumentSeries, self).__init__(series)
@@ -63,7 +67,7 @@ class TwoArgumentSeries(NumericSeries):
 
             try:
                 series[series == np.inf] = np.nan
-                series = TwoArgumentSeries.func(series, arg1, arg2)
+                series = self.__class__.func(series, arg1, arg2)
             except Exception as e:
                 raise FormulaException(e)
         super(TwoArgumentSeries, self).__init__(series)
@@ -74,12 +78,31 @@ class TwoArgumentSeries(NumericSeries):
 class SMASeries(TwoArgumentSeries):
     """同花顺专用SMA"""
 
-    def func(self, series, n, _):
+    def func(series, n, _):
         results = np.nan_to_num(series).copy()
         # FIXME this is very slow
         for i in range(1, len(series)):
             results[i] = ((n - 1) * results[i - 1] + results[i]) / n
         return results
+
+
+class CCISeries(NumericSeries):
+    func = talib.CCI
+
+    def __init__(self, high, low, close):
+        if isinstance(high, NumericSeries) and isinstance(low, NumericSeries) and isinstance(close, NumericSeries):
+            series0 = high.series
+            series1 = low.series
+            series2 = close.series
+
+            try:
+                series0[series0 == np.inf] = np.nan
+                series1[series1 == np.inf] = np.nan
+                series2[series2 == np.inf] = np.nan
+                series = self.__class__.func(series0, series1, series2)
+            except Exception as e:
+                raise FormulaException(e)
+            super(CCISeries, self).__init__(series)
 
 
 class SumSeries(NumericSeries):
