@@ -11,7 +11,7 @@ from numpy.lib import recfunctions as rfn
 from .backend import DataBackend
 from ..utils import get_date_from_int, get_int_date
 
-MAX_BAR_COUNT = 250
+MAX_BAR_COUNT = 10000
 
 class RQAlphaDataBackend(DataBackend):
     """
@@ -19,9 +19,11 @@ class RQAlphaDataBackend(DataBackend):
     """
     skip_suspended = True
 
-    def __init__(self, data_proxy=None):
+    def __init__(self, data_proxy=None, rqalpha_path=None):
         #
         self.data_proxy = data_proxy
+        self.rqalpha_path = rqalpha_path
+        self._datetime = None
 
     def init(self):
         """"""
@@ -29,7 +31,10 @@ class RQAlphaDataBackend(DataBackend):
         from rqalpha.data.base_data_source import BaseDataSource
         from rqalpha.data.data_proxy import DataProxy
 
-        data_bundle_path = os.path.join(os.path.expanduser(rqalpha_path), "bundle")
+        if self.rqalpha_path is None:
+            data_bundle_path = os.path.join(os.path.expanduser(rqalpha_path), "bundle")
+        else:
+            data_bundle_path = self.rqalpha_path
         self.data_proxy = DataProxy(BaseDataSource(os.path.expanduser(data_bundle_path), {}), None)
 
     def get_price(self, order_book_id, start, end, freq):
@@ -43,22 +48,25 @@ class RQAlphaDataBackend(DataBackend):
         if self.data_proxy is None:
             self.init()
 
-        assert freq in ("1d", "1m", "5m")
-
+        assert freq in ("1d", "1m", "5m", "10m", "15m", "30m", "60m")
         start = get_date_from_int(start)
         end = get_date_from_int(end)
-
-        bar_count = min(MAX_BAR_COUNT, (end - start).days)
-
-        bars = self.data_proxy.history_bars(
-            order_book_id, bar_count, freq, field=None,
-            dt=datetime.datetime.combine(end, datetime.time(23, 59, 59)))
-
+        if freq == "1d":
+            bar_count = min(MAX_BAR_COUNT, (end - start).days)
+            bars = self.data_proxy.history_bars(
+                order_book_id, bar_count, freq, field=None,
+                dt=datetime.datetime.combine(end, datetime.time(16, 30, 0)))
+        else:
+            bars = self.data_proxy.history_bars(
+                order_book_id, -1, freq, field=None,
+                dt=datetime.datetime.combine(end, datetime.time(16, 30, 0)),
+                adjust_orig=datetime.datetime.combine(start - datetime.timedelta(days=1), datetime.time(16, 30, 0)))
+            pass
         if bars is None or len(bars) == 0:
             raise KeyError("empty bars {}".format(order_book_id))
         # 只读暂不copy
         # bars = bars.copy()
-
+        self._datetime = bars["datetime"]
         return bars
 
     def get_order_book_id_list(self, type="CS"):
