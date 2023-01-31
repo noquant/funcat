@@ -38,6 +38,8 @@ def test_000002():
     top,left,right,bottom = BOX(1)
     print(top,left,right,bottom)
 
+    tops, btms = BTB(OPEN, CLOSE, HIGH, LOW)
+    print(tops.series, btms.series)
 
 if __name__ == '__main__':
     test_000002()

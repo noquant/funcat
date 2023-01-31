@@ -4,7 +4,7 @@ from .api import (
     OPEN, HIGH, LOW, CLOSE, VOLUME, VOL,
     ABS, MIN, MAX, HHV, LLV, CROSS,
     REF, IF, SUM, STD,
-    MA, EMA, SMA,
+    MA, EMA, SMA, CCI, BTB,
 )
 
 
@@ -82,6 +82,16 @@ def WR(N=10, N1=6):
     return WR1, WR2
 
 
+def TQA(N1=10, N2=6):
+    """
+    TQA 唐奇安
+    """
+    TQA_H = REF(HHV(HIGH, N1), 1)
+    TQA_L = REF(LLV(LOW, N2), 1)
+
+    return TQA_H, TQA_L
+
+
 def BIAS(L1=5, L4=3, L5=10):
     """
     BIAS 乖离率
@@ -109,6 +119,16 @@ def ASI(M1=26, M2=10):
     ASIT = MA(ASI, M2)
 
     return ASI, ASIT
+
+
+def ATR(N=14):
+    """
+    ATR 真实波幅
+    """
+    MTR = MAX(MAX((HIGH-LOW),ABS(REF(CLOSE,1)-HIGH)),ABS(REF(CLOSE,1)-LOW))
+    ATR = MA(MTR,N)
+
+    return MTR, ATR
 
 
 def VR(M1=26):
@@ -153,6 +173,17 @@ def BBI(M1=3, M2=6, M3=12, M4=24):
     BBI = (MA(CLOSE,M1)+MA(CLOSE,M2)+MA(CLOSE,M3)+MA(CLOSE,M4))/4
 
     return BBI
+
+
+def BBIBOLL(N=11, M=3):
+    """
+    BBIBOLL 多空指标
+    """    
+    BBIBOLL = (MA(CLOSE,3)+MA(CLOSE,6)+MA(CLOSE,12)+MA(CLOSE,24))/4
+    UPR = BBIBOLL+M*STD(BBIBOLL,N)
+    DWN = BBIBOLL-M*STD(BBIBOLL,N)
+
+    return BBIBOLL, UPR, DWN
 
 
 def DKX(M=10):

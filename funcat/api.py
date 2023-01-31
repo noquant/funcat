@@ -20,6 +20,7 @@ from .func import (
     llv,
     Ref,
     iif,
+    box_top_bottom,
 )
 from .context import (
     symbol,
@@ -63,6 +64,7 @@ COUNT = count
 HHV = hhv
 LLV = llv
 IF = IIF = iif
+BTB = box_top_bottom
 
 S = set_current_security
 T = set_current_date

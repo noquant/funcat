@@ -192,6 +192,39 @@ def count(cond, n):
 
 
 @handle_numpy_warning
+def box_top_bottom(open, close, high, low):
+    # TODO lazy compute
+    series1 = open.series
+    series2 = close.series
+    series3 = high.series
+    series4 = low.series
+    size = len(open.series)
+    try:
+        tops = np.full(size, np.nan, dtype=np.float64)
+        btms = np.full(size, np.nan, dtype=np.float64)
+    except ValueError as e:
+        raise FormulaException(e)
+    top, btm = np.nan, np.nan
+    last_state = series2[size-1] > series1[size-1]
+    last_top_index = size-1
+    last_btm_index = size-1
+    for i in range(size-2, 0, -1):
+        if series2[i] > series1[i]:
+            btm = min(btm, series4[i]) if last_state else series4[i]
+            if not last_state:
+                tops[i+1:last_top_index] = top
+                last_top_index = i+1
+            last_state = True
+        else:
+            top = max(top, series3[i]) if not last_state else series3[i]
+            if last_state:
+                btms[i+1:last_btm_index] = btm
+                last_btm_index = i+1
+            last_state = False
+    return NumericSeries(tops), NumericSeries(btms)
+
+
+@handle_numpy_warning
 def every(cond, n):
     return count(cond, n) == n
 
