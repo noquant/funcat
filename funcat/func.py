@@ -205,19 +205,19 @@ def box_top_bottom(open, close, high, low):
     except ValueError as e:
         raise FormulaException(e)
     top, btm = np.nan, np.nan
-    last_state = series2[size-1] > series1[size-1]
+    last_state = not series2[size-2] > series1[size-2]
     last_top_index = size-1
     last_btm_index = size-1
-    for i in range(size-2, 0, -1):
-        if series2[i] > series1[i]:
+    for i in range(size-2, 1, -1):
+        if series2[i] > series1[i] or (series2[i] == series1[i] and series2[i] > series2[i-1]):
             btm = min(btm, series4[i]) if last_state else series4[i]
-            if not last_state:
+            if not last_state and top == top:
                 tops[i+1:last_top_index] = top
                 last_top_index = i+1
             last_state = True
         else:
             top = max(top, series3[i]) if not last_state else series3[i]
-            if last_state:
+            if last_state and btm == btm:
                 btms[i+1:last_btm_index] = btm
                 last_btm_index = i+1
             last_state = False
