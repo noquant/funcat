@@ -29,13 +29,13 @@ def test_000002():
     from funcat.data.rqalpha_data_backend import RQAlphaDataBackend
     set_data_backend(RQAlphaDataBackend())
 
-    T("20161216")
+    T("20160725")
     S("000001.XSHG")
 
     d,k = DKX()
     print(d,k)
 
-    top,left,right,bottom = BOX(1)
+    top,left,right,bottom = BOX_BOX_UP()
     print(top,left,right,bottom)
 
     tops, btms = BTB(OPEN, CLOSE, HIGH, LOW)

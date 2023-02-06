@@ -283,7 +283,7 @@ def BOX_DOWN(M2=20):
     start_i, stop_i = 1, M2
     begin_i, end_i = M2, 0
     for i in range(start_i, stop_i):
-        if REF(CLOSE,i) > REF(OPEN,i):
+        if REF(CLOSE,i) > REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) > REF(CLOSE,i+1)):
             begin_i = i
             for j in range(begin_i, stop_i):
                 if not REF(CLOSE,j) > REF(OPEN,j):
@@ -293,7 +293,11 @@ def BOX_DOWN(M2=20):
     # 不一定能够找到箱体
     if end_i >= begin_i:
         # 第一个箱体区间
-        bottom1, top1 = MIN(REF(LOW, end_i), REF(LOW, begin_i)), MAX(REF(HIGH, end_i), REF(HIGH, begin_i))
+        n1 = end_i - begin_i
+        if n1 <= 1:
+            bottom1, top1 = MIN(REF(LOW, end_i), REF(LOW, begin_i)), MAX(REF(HIGH, end_i), REF(HIGH, begin_i))
+        else:
+            bottom1, top1 = LLV(REF(LOW, begin_i), n1+1), HHV(REF(HIGH, begin_i), n1+1)
         return bottom1, top1
 
  
@@ -304,7 +308,7 @@ def BOX_UP(M2=20):
     start_i, stop_i = 1, M2
     begin_i, end_i = M2, 0
     for i in range(start_i, stop_i):
-        if REF(CLOSE,i) < REF(OPEN,i):
+        if REF(CLOSE,i) < REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) < REF(CLOSE,i+1)):
             begin_i = i
             for j in range(begin_i, stop_i):
                 if not REF(CLOSE,j) < REF(OPEN,j):
@@ -314,7 +318,11 @@ def BOX_UP(M2=20):
     # 不一定能够找到箱体
     if end_i >= begin_i:
         # 第一个箱体区间
-        top1, bottom1 = MAX(REF(HIGH, end_i), REF(HIGH, begin_i)), MIN(REF(LOW, end_i), REF(LOW, begin_i))
+        n1 = end_i - begin_i
+        if n1 <= 1:
+            top1, bottom1 = MAX(REF(HIGH, end_i), REF(HIGH, begin_i)), MIN(REF(LOW, end_i), REF(LOW, begin_i))
+        else:
+            top1, bottom1 = HHV(REF(HIGH, begin_i), n1+1), LLV(REF(LOW, begin_i), n1+1)
         return top1, bottom1
 
                 
@@ -325,7 +333,7 @@ def BOX_BOX_DOWN(M2=20):
     start_i, stop_i = 1, M2
     begin_i, end_i = M2, 0
     for i in range(start_i, stop_i):
-        if REF(CLOSE,i) > REF(OPEN,i):
+        if REF(CLOSE,i) > REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) > REF(CLOSE,i+1)):
             begin_i = i
             for j in range(begin_i, stop_i):
                 if not REF(CLOSE,j) > REF(OPEN,j):
@@ -335,12 +343,16 @@ def BOX_BOX_DOWN(M2=20):
     # 不一定能够找到箱体
     if end_i >= begin_i:
         # 第一个箱体区间
-        bottom1, top1 = MIN(REF(LOW, end_i), REF(LOW, begin_i)), MAX(REF(HIGH, end_i), REF(HIGH, begin_i))
+        n1 = end_i - begin_i
+        if n1 <= 1:
+            bottom1, top1 = MIN(REF(LOW, end_i), REF(LOW, begin_i)), MAX(REF(HIGH, end_i), REF(HIGH, begin_i))
+        else:
+            bottom1, top1 = LLV(REF(LOW, begin_i), n1+1), HHV(REF(HIGH, begin_i), n1+1)
         # 之后再找第二个
         start_i, stop_i = 1 + end_i, M2 + end_i
         begin_i, end_i = M2, 0
         for i in range(start_i, stop_i):
-            if REF(CLOSE,i) > REF(OPEN,i):
+            if REF(CLOSE,i) > REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) > REF(CLOSE,i+1)):
                 begin_i = i
                 for j in range(begin_i, stop_i):
                     if not REF(CLOSE,j) > REF(OPEN,j):
@@ -348,7 +360,11 @@ def BOX_BOX_DOWN(M2=20):
                 end_i = j - 1
                 break
         if end_i >= begin_i:
-            bottom2, top2 = MIN(REF(LOW, end_i), REF(LOW, begin_i)), MAX(REF(HIGH, end_i), REF(HIGH, begin_i))
+            n2 = end_i - begin_i
+            if n2 <= 1:
+                bottom2, top2 = MIN(REF(LOW, end_i), REF(LOW, begin_i)), MAX(REF(HIGH, end_i), REF(HIGH, begin_i))
+            else:
+                bottom2, top2 = LLV(REF(LOW, begin_i), n1+1), HHV(REF(HIGH, begin_i), n1+1)
             return bottom1, top1, bottom2, top2
         else:
             return bottom1, top1, None, None
@@ -363,7 +379,7 @@ def BOX_BOX_UP(M2=20):
     start_i, stop_i = 1, M2
     begin_i, end_i = M2, 0
     for i in range(start_i, stop_i):
-        if REF(CLOSE,i) < REF(OPEN,i):
+        if REF(CLOSE,i) < REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) < REF(CLOSE,i+1)):
             begin_i = i
             for j in range(begin_i, stop_i):
                 if not REF(CLOSE,j) < REF(OPEN,j):
@@ -373,12 +389,16 @@ def BOX_BOX_UP(M2=20):
     # 不一定能够找到箱体
     if end_i >= begin_i:
         # 第一个箱体区间
-        top1, bottom1 = MAX(REF(HIGH, end_i), REF(HIGH, begin_i)), MIN(REF(LOW, end_i), REF(LOW, begin_i))
+        n1 = end_i - begin_i
+        if n1 <= 1:
+            top1, bottom1 = MAX(REF(HIGH, end_i), REF(HIGH, begin_i)), MIN(REF(LOW, end_i), REF(LOW, begin_i))
+        else:
+            top1, bottom1 = HHV(REF(HIGH, begin_i), n1+1), LLV(REF(LOW, begin_i), n1+1)
         # 之后再找第二个
         start_i, stop_i = 1 + end_i, M2 + end_i
         begin_i, end_i = M2, 0
         for i in range(start_i, stop_i):
-            if REF(CLOSE,i) < REF(OPEN,i):
+            if REF(CLOSE,i) < REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) < REF(CLOSE,i+1)):
                 begin_i = i
                 for j in range(begin_i, stop_i):
                     if not REF(CLOSE,j) < REF(OPEN,j):
@@ -386,7 +406,11 @@ def BOX_BOX_UP(M2=20):
                 end_i = j - 1
                 break
         if end_i >= begin_i:
-            top2, bottom2 = MAX(REF(HIGH, end_i), REF(HIGH, begin_i)), MIN(REF(LOW, end_i), REF(LOW, begin_i))
+            n2 = end_i - begin_i
+            if n2 <= 1:
+                top2, bottom2 = MAX(REF(HIGH, end_i), REF(HIGH, begin_i)), MIN(REF(LOW, end_i), REF(LOW, begin_i))
+            else:
+                top2, bottom2 = HHV(REF(HIGH, begin_i), n2+1), LLV(REF(LOW, begin_i), n2+1)
             return top1, bottom1, top2, bottom2
         else:
             return top1, bottom1, None, None
