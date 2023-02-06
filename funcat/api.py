@@ -43,7 +43,12 @@ for name in ["open", "high", "low", "close", "volume", "datetime"]:
     for var in [name[0], name[0].upper(), name.upper()]:
         globals()[var] = obj
 
-VOL = VOLUME
+for field,name in [("total_turnover","amo")]:
+    dtype = np.float64
+    cls = type("{}Series".format(name.capitalize()), (MarketDataSeries, ), {"name": field, "dtype": dtype})
+    obj = cls(dynamic_update=True)
+    for var in [name.upper()]:
+        globals()[var] = obj
 
 MA = MovingAverageSeries
 WMA = WeightedMovingAverageSeries
@@ -75,8 +80,10 @@ __all__ = [
     "HIGH", "H",
     "LOW", "L",
     "CLOSE", "C",
-    "VOLUME", "V", "VOL",
+    "VOLUME", "V",
     "DATETIME",
+
+    "AMO",
 
     "SMA",
     "CCI",

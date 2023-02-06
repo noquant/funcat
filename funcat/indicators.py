@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .api import (
-    OPEN, HIGH, LOW, CLOSE, VOLUME, VOL,
+    OPEN, HIGH, LOW, CLOSE, VOLUME, AMO,
     ABS, MIN, MAX, HHV, LLV, CROSS,
     REF, IF, SUM, STD,
     MA, EMA, SMA, CCI, BTB,
@@ -46,7 +46,7 @@ def MACD(SHORT=12, LONG=26, M=9):
     DEA = EMA(DIFF, M)
     MACD = (DIFF - DEA) * 2
 
-    return MACD
+    return DIFF, DEA, MACD
 
 
 def RSI(N1=6, N2=12, N3=24):
@@ -136,9 +136,30 @@ def VR(M1=26):
     VR容量比率
     """
     LC = REF(CLOSE, 1)
-    VR = SUM(IF(CLOSE > LC, VOL, 0), M1) / SUM(IF(CLOSE <= LC, VOL, 0), M1) * 100
+    VR = SUM(IF(CLOSE > LC, VOLUME, 0), M1) / SUM(IF(CLOSE <= LC, VOLUME, 0), M1) * 100
 
     return VR
+
+
+def VOL(M1=5, M2=10):
+    """
+    VOL 成交量及平均
+    """
+    MAVOL1 = MA(VOLUME, M1)
+    MAVOL2 = MA(VOLUME, M2)
+
+    return VOLUME, MAVOL1, MAVOL2
+
+
+def AMOUNT(M1=6, M2=12, M3=24):
+    """
+    AMO 成交额及平均
+    """
+    MAAMO1 = MA(AMO, M1)
+    MAAMO2 = MA(AMO, M2)
+    MAAMO3 = MA(AMO, M3)
+
+    return AMO, MAAMO1, MAAMO2, MAAMO3
 
 
 def ARBR(M1=26):
