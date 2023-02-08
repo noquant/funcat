@@ -26,7 +26,7 @@ def get_bars(freq):
         return bars
 
     # if security is suspend, just skip
-    if data_backend.skip_suspended and bars["datetime"][-1] // 1000000 < current_date and freq not in ("W", "M"):
+    if data_backend.skip_suspended and bars["datetime"][-1] // 1000000 < current_date and freq not in ("1w", "W", "M"):
         ExecutionContext.set_current_date(bars["datetime"][-1] // 1000000)
 
     return bars

@@ -48,13 +48,18 @@ class RQAlphaDataBackend(DataBackend):
         if self.data_proxy is None:
             self.init()
 
-        assert freq in ("1d", "1m", "5m", "10m", "15m", "30m", "60m")
+        assert freq in ("1d", "1w", "1m", "5m", "10m", "15m", "30m", "60m", "D", "W")
         start = get_date_from_int(start)
         end = get_date_from_int(end)
-        if freq == "1d":
+        if freq in ("1d","D"):
             bar_count = min(MAX_BAR_COUNT, (end - start).days)
             bars = self.data_proxy.history_bars(
-                order_book_id, bar_count, freq, field=None,
+                order_book_id, bar_count, "1d", field=None,
+                dt=datetime.datetime.combine(end, datetime.time(16, 30, 0)))
+        elif freq in ("1w","W"):
+            bar_count = min(MAX_BAR_COUNT, int((end - start).days / 7)) + 1
+            bars = self.data_proxy.history_bars(
+                order_book_id, bar_count, "1w", field=None,
                 dt=datetime.datetime.combine(end, datetime.time(16, 30, 0)))
         else:
             bars = self.data_proxy.history_bars(
