@@ -114,3 +114,17 @@ class RQAlphaDataBackend(DataBackend):
         trading_dates = self.data_proxy.get_trading_dates(start, end).tolist()
         trading_dates = [get_int_date(dt.date()) for dt in trading_dates]
         return trading_dates
+
+    def get_previous_trading_date(self, start):
+        """获取所有的交易日
+
+        :param start: 20160101
+        :param end: 20160201
+        """
+        if self.data_proxy is None:
+            self.init()
+            
+        start = get_date_from_int(start)
+        trading_date = self.data_proxy.get_previous_trading_date(start)
+        trading_date = get_int_date(trading_date.date())
+        return trading_date

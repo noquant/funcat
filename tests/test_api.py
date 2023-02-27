@@ -5,7 +5,9 @@
 import numpy as np
 
 from funcat import *
-
+from funcat.time_series import (
+    fit_series,
+)
 
 def test_000001():
     from funcat.data.tushare_backend import TushareDataBackend
@@ -29,11 +31,38 @@ def test_000002():
     from funcat.data.rqalpha_data_backend import RQAlphaDataBackend
     set_data_backend(RQAlphaDataBackend())
 
-    T("20160725")
+    # T("20160104")
+    # T("20150727")
+    # T("20140703")
+    T("20230103")
     S("000001.XSHG")
 
-    d,k = DKX()
-    print(d,k)
+    dkx,madkx = DKX()
+    print(dkx,madkx)
+    c_dn_dkx = CROSS(madkx, dkx)
+    if c_dn_dkx:
+        series1, series2, series3 = fit_series(dkx.series, c_dn_dkx.series, madkx.series)
+        series_m = (series1[series2] + series3[series2]*2) / 3
+        if series_m[-1] < series_m[-2] and series_m[-1] / series_m[-2] > 0.9:
+            print('死叉M头信号', series_m[-1], series_m[-2])
+    elif REF(dkx,1) - REF(madkx,1) > dkx - madkx > 0:
+        series1, series2, series3 = fit_series(dkx.series, c_dn_dkx.series, madkx.series)
+        series_m = (series1[series2] + series3[series2]*2) / 3
+        if madkx < series_m[-1] and CLOSE < madkx < MAX(HIGH, REF(CLOSE,1)):
+            print('穿黄线M头信号', series_m[-1], CLOSE, madkx, MAX(HIGH, REF(CLOSE,1)))
+    #
+    c_up_dkx = CROSS(dkx, madkx)
+    if c_up_dkx:
+        series1, series2, series3 = fit_series(dkx.series, c_up_dkx.series, madkx.series)
+        series_w = (series1[series2] + series3[series2]*2) / 3
+        if series_w[-1] > series_w[-2] and series_w[-1] / series_w[-2] < 1.1:
+            print('金叉W底信号', series_w[-1], series_w[-2])
+    elif REF(dkx,1) - REF(madkx,1) > dkx - madkx > 0:
+        series1, series2, series3 = fit_series(dkx.series, c_up_dkx.series, madkx.series)
+        series_w = (series1[series2] + series3[series2]*2) / 3
+        if madkx > series_w[-1] and CLOSE > dkx > MIN(LOW, REF(CLOSE,1)):
+            print('穿白线W底信号', series_w[-1], CLOSE, madkx, MAX(HIGH, REF(CLOSE,1)))
+
 
     top,left,right,bottom = BOX_BOX_UP()
     print(top,left,right,bottom)

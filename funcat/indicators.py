@@ -82,7 +82,7 @@ def WR(N=10, N1=6):
     return WR1, WR2
 
 
-def TQA(N1=10, N2=6):
+def TQA(N1=20, N2=10):
     """
     TQA 唐奇安
     """
@@ -357,7 +357,7 @@ def BOX_BOX_DOWN(M2=20):
         if REF(CLOSE,i) > REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) > REF(CLOSE,i+1)):
             begin_i = i
             for j in range(begin_i, stop_i):
-                if not REF(CLOSE,j) > REF(OPEN,j):
+                if not (REF(CLOSE,j) > REF(OPEN,j) or (REF(CLOSE,j) == REF(OPEN,j) and REF(CLOSE,j) > REF(CLOSE,j+1))):
                     break
             end_i = j - 1
             break
@@ -376,7 +376,7 @@ def BOX_BOX_DOWN(M2=20):
             if REF(CLOSE,i) > REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) > REF(CLOSE,i+1)):
                 begin_i = i
                 for j in range(begin_i, stop_i):
-                    if not REF(CLOSE,j) > REF(OPEN,j):
+                    if not (REF(CLOSE,j) > REF(OPEN,j) or (REF(CLOSE,j) == REF(OPEN,j) and REF(CLOSE,j) > REF(CLOSE,j+1))):
                         break
                 end_i = j - 1
                 break
@@ -385,7 +385,7 @@ def BOX_BOX_DOWN(M2=20):
             if n2 <= 1:
                 bottom2, top2 = MIN(REF(LOW, end_i), REF(LOW, begin_i)), MAX(REF(HIGH, end_i), REF(HIGH, begin_i))
             else:
-                bottom2, top2 = LLV(REF(LOW, begin_i), n1+1), HHV(REF(HIGH, begin_i), n1+1)
+                bottom2, top2 = LLV(REF(LOW, begin_i), n2+1), HHV(REF(HIGH, begin_i), n2+1)
             return bottom1, top1, bottom2, top2
         else:
             return bottom1, top1, None, None
@@ -400,10 +400,10 @@ def BOX_BOX_UP(M2=20):
     start_i, stop_i = 1, M2
     begin_i, end_i = M2, 0
     for i in range(start_i, stop_i):
-        if REF(CLOSE,i) < REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) < REF(CLOSE,i+1)):
+        if REF(CLOSE,i) < REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) <= REF(CLOSE,i+1)):
             begin_i = i
             for j in range(begin_i, stop_i):
-                if not REF(CLOSE,j) < REF(OPEN,j):
+                if not (REF(CLOSE,j) < REF(OPEN,j) or (REF(CLOSE,j) == REF(OPEN,j) and REF(CLOSE,j) <= REF(CLOSE,j+1))):
                     break
             end_i = j - 1
             break
@@ -419,10 +419,10 @@ def BOX_BOX_UP(M2=20):
         start_i, stop_i = 1 + end_i, M2 + end_i
         begin_i, end_i = M2, 0
         for i in range(start_i, stop_i):
-            if REF(CLOSE,i) < REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) < REF(CLOSE,i+1)):
+            if REF(CLOSE,i) < REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) <= REF(CLOSE,i+1)):
                 begin_i = i
                 for j in range(begin_i, stop_i):
-                    if not REF(CLOSE,j) < REF(OPEN,j):
+                    if not (REF(CLOSE,j) < REF(OPEN,j) or (REF(CLOSE,j) == REF(OPEN,j) and REF(CLOSE,j) <= REF(CLOSE,j+1))):
                         break
                 end_i = j - 1
                 break
