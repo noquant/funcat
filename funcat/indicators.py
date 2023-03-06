@@ -320,6 +320,8 @@ def BOX_DOWN(M2=20):
         else:
             bottom1, top1 = LLV(REF(LOW, begin_i), n1+1), HHV(REF(HIGH, begin_i), n1+1)
         return bottom1, top1
+    #
+    return None, None
 
  
 def BOX_UP(M2=20):
@@ -345,6 +347,8 @@ def BOX_UP(M2=20):
         else:
             top1, bottom1 = HHV(REF(HIGH, begin_i), n1+1), LLV(REF(LOW, begin_i), n1+1)
         return top1, bottom1
+    #
+    return None, None
 
                 
 def BOX_BOX_DOWN(M2=20):
