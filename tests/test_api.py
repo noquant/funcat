@@ -70,5 +70,20 @@ def test_000002():
     tops, btms = BTB(OPEN, CLOSE, HIGH, LOW)
     print(tops.series, btms.series)
 
+
+def test_000003():
+    from funcat.data.rqalpha_data_backend import RQAlphaDataBackend
+    set_data_backend(RQAlphaDataBackend(rqalpha_path='D:/.rqalpha/bundle'))
+
+    # T("20160104")
+    # T("20150727")
+    # T("20140703")
+    T("20230306")
+    S("000002.XSHE")
+
+    t1, t2, t3, b = ZIG(10)
+    print(t1.series, t2.series, t3.series, b)
+        
+
 if __name__ == '__main__':
-    test_000002()
+    test_000003()

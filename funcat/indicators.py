@@ -6,7 +6,9 @@ from .api import (
     REF, IF, SUM, STD,
     MA, EMA, SMA, CCI, BTB,
 )
-
+from .time_series import (
+    NumericSeries,
+)
 
 def KDJ(N=9, M1=3, M2=3):
     """
@@ -223,38 +225,127 @@ def DKX(M=10):
     return DKX, MADKX
 
 
-def BOX(Direction=None, M1=20):
-    """
-    BOX 箱体计算
-    """    
-    if Direction is None:
-        if REF(CLOSE,1) > REF(OPEN,1):
-            Direction = 1
+def ZIG(K=3, N=10):
+    """计算之字转向"""
+    if isinstance(K, int):
+        if K == 0:
+            hhv = HHV(OPEN, 12)
+            llv = LLV(OPEN, 12)
+        elif K == 1:
+            hhv = HHV(HIGH, 12)
+            llv = LLV(HIGH, 12)
+        elif K == 2:
+            hhv = HHV(LOW, 12)
+            llv = LLV(LOW, 12)
+        elif K == 3:
+            hhv = HHV(CLOSE, 12)
+            llv = LLV(CLOSE, 12)
         else:
-            Direction = -1
-    #
-    if Direction == 1:
-        for i in range(1, M1):
-            if REF(CLOSE,i) > REF(OPEN,i):
-                break
-        begin_i = i
-        for i in range(begin_i, M1):
-            if not REF(CLOSE,i) > REF(OPEN,i):
-                break
-        end_i = i - 1
-        # 箱体区间
-        return REF(LOW, end_i), REF(OPEN, end_i), REF(CLOSE, begin_i), REF(HIGH, begin_i)
+            hhv = HHV(CLOSE, 12)
+            llv = LLV(CLOSE, 12)
     else:
-        for i in range(1, M1):
-            if REF(CLOSE,i) < REF(OPEN,i):
-                break
-        begin_i = i
-        for i in range(begin_i, M1):
-            if not REF(CLOSE,i) < REF(OPEN,i):
-                break
-        end_i = i - 1
-        # 箱体区间
-        return REF(HIGH, end_i), REF(OPEN, end_i), REF(CLOSE, begin_i), REF(LOW, begin_i)
+        hhv = HHV(K, 12)
+        llv = LLV(K, 12)
+    #
+    count = min(len(hhv), len(llv)) - 1
+    # print(hhv.series)
+    # print(llv.series)
+    cur_stat = None
+    last_h = ('high', hhv.value, 0)
+    last_l = ('low', llv.value, 0)
+    peak_list = []
+    for i in range(1, count):
+        if cur_stat is None:
+            # 状态为空时候初始化，需要同时判断峰谷两个点
+            new_h1, new_h2, new_h3 = REF(hhv, i+1).value, REF(hhv, i).value, REF(hhv, i-1).value
+            if new_h1 < new_h2 == new_h3 and new_h2 >= last_h[1]:
+                last_h = ('high', new_h2, i)
+                if last_h[1] / last_l[1] > 1 + N/100:
+                    if last_h[2] > last_l[2]:
+                        peak_list.append(last_l)
+                        peak_list.append(last_h)
+                    else:
+                        peak_list.append(last_h)
+                        peak_list.append(last_l)
+                    cur_stat = -1
+            new_l1, new_l2, new_l3 = REF(llv, i+1).value, REF(llv, i).value, REF(llv, i-1).value
+            if new_l1 > new_l2 == new_l3 and new_l2 <= last_l[1]:
+                last_l = ('low', new_l2, i)
+                if last_h[1] / last_l[1] > 1 + N/100:
+                    if last_h[2] > last_l[2]:
+                        peak_list.append(last_l)
+                        peak_list.append(last_h)
+                    else:
+                        peak_list.append(last_h)
+                        peak_list.append(last_l)
+                    cur_stat = 1
+            pass
+        else:
+            # 检测波峰并判断是否复合条件
+            new_h1, new_h2, new_h3 = REF(hhv, i+1).value, REF(hhv, i).value, REF(hhv, i-1).value
+            if new_h1 < new_h2 == new_h3:
+                # print(new_h1, new_h2, new_h3)
+                flag, last_c, idx = peak_list[-1]
+                if flag == 'high':
+                    if new_h2 > last_c:
+                        peak_list[-1] = ('high', new_h2, i)
+                    else:
+                        pass
+                elif new_h2 / last_c > 1 + N/100:
+                    peak_list.append(('high', new_h2, i))
+            # 检测波峰并判断是否复合条件
+            new_l1, new_l2, new_l3 = REF(llv, i+1).value, REF(llv, i).value, REF(llv, i-1).value
+            if new_l1 > new_l2 == new_l3:
+                # print(new_l1, new_l2, new_l3)
+                flag, last_c, idx = peak_list[-1]
+                if flag == 'low':
+                    if new_l2 < last_c:
+                        peak_list[-1] = ('low', new_l2, i)
+                    else:
+                        pass
+                elif last_c / new_l2 > 1 + N/100:
+                    peak_list.append(('low', new_l2, i))
+    #
+    bool_list, h_bool_list, l_bool_list = [], [], []
+    i = 0
+    for p in peak_list:
+        while i != p[2]:
+            bool_list.append(False)
+            h_bool_list.append(False)
+            l_bool_list.append(False)
+            i += 1
+        if p[0] == 'low':
+            h_bool_list.append(False)
+            l_bool_list.append(True)
+        else:
+            h_bool_list.append(True)
+            l_bool_list.append(False)
+        bool_list.append(True)
+        i += 1
+    bool_list.reverse()
+    h_bool_list.reverse()
+    l_bool_list.reverse()
+    #
+    if isinstance(K, int):
+        if K == 0:
+            series = CLOSE.series[-len(bool_list):]
+        elif K == 1:
+            series = HIGH.series[-len(bool_list):]
+        elif K == 2:
+            series = LOW.series[-len(bool_list):]
+        elif K == 3:
+            series = CLOSE.series[-len(bool_list):]
+        else:
+            series = CLOSE.series[-len(bool_list):]
+    else:
+        series = K.series[-len(bool_list):]
+    #
+    a_series = series[bool_list]
+    h_series = series[h_bool_list]
+    l_series = series[l_bool_list]
+    # print(peak_list)
+    # print(series)
+    return NumericSeries(a_series), NumericSeries(h_series), NumericSeries(l_series), bool_list
 
 
 def BOX_FIND(Direction=None, M1=20):
