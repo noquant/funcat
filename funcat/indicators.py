@@ -260,7 +260,13 @@ def ZIG(K=3, N=10):
             new_h1, new_h2, new_h3 = REF(hhv, i+1).value, REF(hhv, i).value, REF(hhv, i-1).value
             if new_h1 < new_h2 == new_h3 and new_h2 >= last_h[1]:
                 last_h = ('high', new_h2, i)
-                if last_h[1] / last_l[1] > 1 + N/100:
+                # 涨幅还是跌幅
+                if last_h[2] > last_l[2]:
+                    chg_ratio = (last_h[1] - last_l[1]) / last_h[1]
+                else:
+                    chg_ratio = (last_h[1] - last_l[1]) / last_l[1]
+                # 阈值判断
+                if chg_ratio > N/100:
                     if last_h[2] > last_l[2]:
                         peak_list.append(last_l)
                         peak_list.append(last_h)
@@ -271,7 +277,13 @@ def ZIG(K=3, N=10):
             new_l1, new_l2, new_l3 = REF(llv, i+1).value, REF(llv, i).value, REF(llv, i-1).value
             if new_l1 > new_l2 == new_l3 and new_l2 <= last_l[1]:
                 last_l = ('low', new_l2, i)
-                if last_h[1] / last_l[1] > 1 + N/100:
+                # 涨幅还是跌幅
+                if last_h[2] > last_l[2]:
+                    chg_ratio = (last_h[1] - last_l[1]) / last_h[1]
+                else:
+                    chg_ratio = (last_h[1] - last_l[1]) / last_l[1]
+                # 阈值判断
+                if chg_ratio > N/100:
                     if last_h[2] > last_l[2]:
                         peak_list.append(last_l)
                         peak_list.append(last_h)
@@ -291,7 +303,7 @@ def ZIG(K=3, N=10):
                         peak_list[-1] = ('high', new_h2, i)
                     else:
                         pass
-                elif new_h2 / last_c > 1 + N/100:
+                elif (new_h2 - last_c) / new_h2 > N/100:  # 跌幅
                     peak_list.append(('high', new_h2, i))
             # 检测波峰并判断是否复合条件
             new_l1, new_l2, new_l3 = REF(llv, i+1).value, REF(llv, i).value, REF(llv, i-1).value
@@ -303,7 +315,7 @@ def ZIG(K=3, N=10):
                         peak_list[-1] = ('low', new_l2, i)
                     else:
                         pass
-                elif last_c / new_l2 > 1 + N/100:
+                elif (last_c - new_l2) / new_l2 > N/100:  # 涨幅
                     peak_list.append(('low', new_l2, i))
     #
     bool_list, h_bool_list, l_bool_list = [], [], []
