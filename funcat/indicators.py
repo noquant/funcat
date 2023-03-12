@@ -4,7 +4,7 @@ from .api import (
     OPEN, HIGH, LOW, CLOSE, VOLUME, AMO,
     ABS, MIN, MAX, HHV, LLV, CROSS,
     REF, IF, SUM, STD,
-    MA, EMA, SMA, CCI, BTB,
+    MA, WMA, EMA, SMA, CCI, BTB,
 )
 from .time_series import (
     NumericSeries,
@@ -214,12 +214,13 @@ def DKX(M=10):
     DKX 多空线
     """    
     MID = (3*CLOSE+LOW+OPEN+HIGH)/6
-    DKX = (20*MID+19*REF(MID,1)+18*REF(MID,2)+17*REF(MID,3)+
-        16*REF(MID,4)+15*REF(MID,5)+14*REF(MID,6)+
-        13*REF(MID,7)+12*REF(MID,8)+11*REF(MID,9)+
-        10*REF(MID,10)+9*REF(MID,11)+8*REF(MID,12)+
-        7*REF(MID,13)+6*REF(MID,14)+5*REF(MID,15)+
-        4*REF(MID,16)+3*REF(MID,17)+2*REF(MID,18)+REF(MID,20))/210
+    # DKX = (20*MID+19*REF(MID,1)+18*REF(MID,2)+17*REF(MID,3)+
+    #     16*REF(MID,4)+15*REF(MID,5)+14*REF(MID,6)+
+    #     13*REF(MID,7)+12*REF(MID,8)+11*REF(MID,9)+
+    #     10*REF(MID,10)+9*REF(MID,11)+8*REF(MID,12)+
+    #     7*REF(MID,13)+6*REF(MID,14)+5*REF(MID,15)+
+    #     4*REF(MID,16)+3*REF(MID,17)+2*REF(MID,18)+REF(MID,20))/210
+    DKX = WMA(MID, 20)
     MADKX = MA(DKX, M)
 
     return DKX, MADKX
@@ -406,11 +407,20 @@ def BOX_DOWN(M2=20):
     """
     start_i, stop_i = 1, M2
     begin_i, end_i = M2, 0
+    # for i in range(start_i, stop_i):
+    #     if REF(CLOSE,i) > REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) > REF(CLOSE,i+1)):
+    #         begin_i = i
+    #         for j in range(begin_i, stop_i):
+    #             if not REF(CLOSE,j) > REF(OPEN,j):
+    #                 break
+    #         end_i = j - 1
+    #         break
+    c_index, c_series, o_index, o_series = len(CLOSE) - 1, CLOSE.series, len(OPEN) - 1, OPEN.series
     for i in range(start_i, stop_i):
-        if REF(CLOSE,i) > REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) > REF(CLOSE,i+1)):
+        if c_series[c_index-i] > o_series[o_index-i] or (c_series[c_index-i] == o_series[o_index-i] and c_series[c_index-i] > c_series[c_index-(i+1)]):
             begin_i = i
             for j in range(begin_i, stop_i):
-                if not REF(CLOSE,j) > REF(OPEN,j):
+                if not (c_series[c_index-j] > o_series[o_index-j] or (c_series[c_index-j] == o_series[o_index-j] and c_series[c_index-j] > c_series[c_index-(j+1)])):
                     break
             end_i = j - 1
             break
@@ -433,11 +443,20 @@ def BOX_UP(M2=20):
     """
     start_i, stop_i = 1, M2
     begin_i, end_i = M2, 0
+    # for i in range(start_i, stop_i):
+    #     if REF(CLOSE,i) < REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) < REF(CLOSE,i+1)):
+    #         begin_i = i
+    #         for j in range(begin_i, stop_i):
+    #             if not REF(CLOSE,j) < REF(OPEN,j):
+    #                 break
+    #         end_i = j - 1
+    #         break
+    c_index, c_series, o_index, o_series = len(CLOSE) - 1, CLOSE.series, len(OPEN) - 1, OPEN.series
     for i in range(start_i, stop_i):
-        if REF(CLOSE,i) < REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) < REF(CLOSE,i+1)):
+        if c_series[c_index-i] < o_series[o_index-i] or (c_series[c_index-i] == o_series[o_index-i] and c_series[c_index-i] <= c_series[c_index-(i+1)]):
             begin_i = i
             for j in range(begin_i, stop_i):
-                if not REF(CLOSE,j) < REF(OPEN,j):
+                if not (c_series[c_index-j] < o_series[o_index-j] or (c_series[c_index-j] == o_series[o_index-j] and c_series[c_index-j] <= c_series[c_index-(j+1)])):
                     break
             end_i = j - 1
             break
@@ -460,11 +479,20 @@ def BOX_BOX_DOWN(M2=20):
     """
     start_i, stop_i = 1, M2
     begin_i, end_i = M2, 0
+    # for i in range(start_i, stop_i):
+    #     if REF(CLOSE,i) > REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) > REF(CLOSE,i+1)):
+    #         begin_i = i
+    #         for j in range(begin_i, stop_i):
+    #             if not (REF(CLOSE,j) > REF(OPEN,j) or (REF(CLOSE,j) == REF(OPEN,j) and REF(CLOSE,j) > REF(CLOSE,j+1))):
+    #                 break
+    #         end_i = j - 1
+    #         break
+    c_index, c_series, o_index, o_series = len(CLOSE) - 1, CLOSE.series, len(OPEN) - 1, OPEN.series
     for i in range(start_i, stop_i):
-        if REF(CLOSE,i) > REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) > REF(CLOSE,i+1)):
+        if c_series[c_index-i] > o_series[o_index-i] or (c_series[c_index-i] == o_series[o_index-i] and c_series[c_index-i] > c_series[c_index-(i+1)]):
             begin_i = i
             for j in range(begin_i, stop_i):
-                if not (REF(CLOSE,j) > REF(OPEN,j) or (REF(CLOSE,j) == REF(OPEN,j) and REF(CLOSE,j) > REF(CLOSE,j+1))):
+                if not (c_series[c_index-j] > o_series[o_index-j] or (c_series[c_index-j] == o_series[o_index-j] and c_series[c_index-j] > c_series[c_index-(j+1)])):
                     break
             end_i = j - 1
             break
@@ -479,11 +507,19 @@ def BOX_BOX_DOWN(M2=20):
         # 之后再找第二个
         start_i, stop_i = 1 + end_i, M2 + end_i
         begin_i, end_i = M2, 0
+        # for i in range(start_i, stop_i):
+        #     if REF(CLOSE,i) > REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) > REF(CLOSE,i+1)):
+        #         begin_i = i
+        #         for j in range(begin_i, stop_i):
+        #             if not (REF(CLOSE,j) > REF(OPEN,j) or (REF(CLOSE,j) == REF(OPEN,j) and REF(CLOSE,j) > REF(CLOSE,j+1))):
+        #                 break
+        #         end_i = j - 1
+        #         break
         for i in range(start_i, stop_i):
-            if REF(CLOSE,i) > REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) > REF(CLOSE,i+1)):
+            if c_series[c_index-i] > o_series[o_index-i] or (c_series[c_index-i] == o_series[o_index-i] and c_series[c_index-i] > c_series[c_index-(i+1)]):
                 begin_i = i
                 for j in range(begin_i, stop_i):
-                    if not (REF(CLOSE,j) > REF(OPEN,j) or (REF(CLOSE,j) == REF(OPEN,j) and REF(CLOSE,j) > REF(CLOSE,j+1))):
+                    if not (c_series[c_index-j] > o_series[o_index-j] or (c_series[c_index-j] == o_series[o_index-j] and c_series[c_index-j] > c_series[c_index-(j+1)])):
                         break
                 end_i = j - 1
                 break
@@ -506,11 +542,20 @@ def BOX_BOX_UP(M2=20):
     """
     start_i, stop_i = 1, M2
     begin_i, end_i = M2, 0
+    # for i in range(start_i, stop_i):
+    #     if REF(CLOSE,i) < REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) <= REF(CLOSE,i+1)):
+    #         begin_i = i
+    #         for j in range(begin_i, stop_i):
+    #             if not (REF(CLOSE,j) < REF(OPEN,j) or (REF(CLOSE,j) == REF(OPEN,j) and REF(CLOSE,j) <= REF(CLOSE,j+1))):
+    #                 break
+    #         end_i = j - 1
+    #         break
+    c_index, c_series, o_index, o_series = len(CLOSE) - 1, CLOSE.series, len(OPEN) - 1, OPEN.series
     for i in range(start_i, stop_i):
-        if REF(CLOSE,i) < REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) <= REF(CLOSE,i+1)):
+        if c_series[c_index-i] < o_series[o_index-i] or (c_series[c_index-i] == o_series[o_index-i] and c_series[c_index-i] <= c_series[c_index-(i+1)]):
             begin_i = i
             for j in range(begin_i, stop_i):
-                if not (REF(CLOSE,j) < REF(OPEN,j) or (REF(CLOSE,j) == REF(OPEN,j) and REF(CLOSE,j) <= REF(CLOSE,j+1))):
+                if not (c_series[c_index-j] < o_series[o_index-j] or (c_series[c_index-j] == o_series[o_index-j] and c_series[c_index-j] <= c_series[c_index-(j+1)])):
                     break
             end_i = j - 1
             break
@@ -525,11 +570,19 @@ def BOX_BOX_UP(M2=20):
         # 之后再找第二个
         start_i, stop_i = 1 + end_i, M2 + end_i
         begin_i, end_i = M2, 0
+        # for i in range(start_i, stop_i):
+        #     if REF(CLOSE,i) < REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) <= REF(CLOSE,i+1)):
+        #         begin_i = i
+        #         for j in range(begin_i, stop_i):
+        #             if not (REF(CLOSE,j) < REF(OPEN,j) or (REF(CLOSE,j) == REF(OPEN,j) and REF(CLOSE,j) <= REF(CLOSE,j+1))):
+        #                 break
+        #         end_i = j - 1
+        #         break
         for i in range(start_i, stop_i):
-            if REF(CLOSE,i) < REF(OPEN,i) or (REF(CLOSE,i) == REF(OPEN,i) and REF(CLOSE,i) <= REF(CLOSE,i+1)):
+            if c_series[c_index-i] < o_series[o_index-i] or (c_series[c_index-i] == o_series[o_index-i] and c_series[c_index-i] <= c_series[c_index-(i+1)]):
                 begin_i = i
                 for j in range(begin_i, stop_i):
-                    if not (REF(CLOSE,j) < REF(OPEN,j) or (REF(CLOSE,j) == REF(OPEN,j) and REF(CLOSE,j) <= REF(CLOSE,j+1))):
+                    if not (c_series[c_index-j] < o_series[o_index-j] or (c_series[c_index-j] == o_series[o_index-j] and c_series[c_index-j] <= c_series[c_index-(j+1)])):
                         break
                 end_i = j - 1
                 break
