@@ -68,8 +68,9 @@ def BOLL(N=20, P=2):
     BOLL 布林带
     """
     MID = MA(CLOSE, N)
-    UPPER = MID + STD(CLOSE, N) * P
-    LOWER = MID - STD(CLOSE, N) * P
+    C_STD_P = STD(CLOSE, N) * P
+    UPPER = MID + C_STD_P
+    LOWER = MID - C_STD_P
 
     return UPPER, MID, LOWER
 
