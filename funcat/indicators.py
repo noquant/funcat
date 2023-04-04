@@ -242,6 +242,9 @@ def ZIG(K=3, N=10):
         elif K == 3:
             hhv = HHV(CLOSE, 12)
             llv = LLV(CLOSE, 12)
+        elif K == 4:
+            hhv = HHV(HIGH, 12)
+            llv = LLV(LOW, 12)
         else:
             hhv = HHV(CLOSE, 12)
             llv = LLV(CLOSE, 12)
@@ -341,22 +344,33 @@ def ZIG(K=3, N=10):
     l_bool_list.reverse()
     #
     if isinstance(K, int):
-        if K == 0:
-            series = CLOSE.series[-len(bool_list):]
-        elif K == 1:
-            series = HIGH.series[-len(bool_list):]
-        elif K == 2:
-            series = LOW.series[-len(bool_list):]
-        elif K == 3:
-            series = CLOSE.series[-len(bool_list):]
+        # o,h,l,c 对应返回
+        if K in (0, 1, 2, 3):
+            if K == 0:
+                series = CLOSE.series[-len(bool_list):]
+            elif K == 1:
+                series = HIGH.series[-len(bool_list):]
+            elif K == 2:
+                series = LOW.series[-len(bool_list):]
+            elif K == 3:
+                series = CLOSE.series[-len(bool_list):]
+            a_series = series[bool_list]
+            h_series = series[h_bool_list]
+            l_series = series[l_bool_list]
         else:
-            series = CLOSE.series[-len(bool_list):]
+            close_series = CLOSE.series[-len(bool_list):]
+            high_series = HIGH.series[-len(bool_list):]
+            low_series = LOW.series[-len(bool_list):]
+
+            a_series = close_series[bool_list]
+            h_series = high_series[h_bool_list]
+            l_series = low_series[l_bool_list]
     else:
         series = K.series[-len(bool_list):]
-    #
-    a_series = series[bool_list]
-    h_series = series[h_bool_list]
-    l_series = series[l_bool_list]
+        #
+        a_series = series[bool_list]
+        h_series = series[h_bool_list]
+        l_series = series[l_bool_list]
     # print(peak_list)
     # print(series)
     return NumericSeries(a_series), NumericSeries(h_series), NumericSeries(l_series), bool_list

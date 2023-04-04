@@ -81,7 +81,7 @@ def test_000003():
     T("20230306")
     S("000002.XSHE")
 
-    t1, t2, t3, b = ZIG(10)
+    t1, t2, t3, b = ZIG(K=5, N=15)
     print(t1.series, t2.series, t3.series, b)
         
 
